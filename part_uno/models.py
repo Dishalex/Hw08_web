@@ -1,7 +1,8 @@
-from mongoengine import *
-from mongoengine.fields import ListField, StringField, ReferenceField
+from mongoengine import Document, StringField, ListField, ReferenceField
 
-    
+
+# Модель для колекції 'authors'
+
 class Author(Document):
     fullname = StringField(required=True)
     born_date = StringField(max_length=30)
@@ -10,8 +11,10 @@ class Author(Document):
     meta = {'allow_inheritance': True}
 
 
+# Модель для колекції 'quotes'
+
 class Quote(Document):
     tags = ListField(StringField(max_length=30))
-    author = ReferenceField(Author, reverse_delete_rule=CASCADE)
-    quote = StringField(max_length=150, required=True)
+    author = ReferenceField(Author)
+    quote = StringField(max_length=200, required=True)
     meta = {'allow_inheritance': True}

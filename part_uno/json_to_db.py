@@ -1,34 +1,38 @@
 import json
 from pathlib import Path
+
 from models import Author, Quote
 import connect
 
-author_data_path = Path('JSON/authors.json')
-with open(author_data_path, 'r', encoding='utf-8') as author_file:
-    author_data = json.load(author_file)
+def load_data():
 
-for obj in author_data:
-    author = Author(
-        fullname=obj['fullname'],
-        born_date=obj['born_date'],
-        born_location=obj['born_location'],
-        description=obj['description']
-    )
-    author.save()
 
-quote_data_path = Path('JSON/qoutes.json')
-with open(quote_data_path, 'r', encoding='utf-8') as quote_file:
-    quote_data = json.load(quote_file)
+    # Завантаження даних авторів
+    author_data_path = Path('part_uno/json/authors.json')
 
-for obj in quote_data:
-    author = Author.objects(fullname=obj['author']).first()
+    with open(author_data_path, 'r') as authors_file:
+        authors_data = json.load(authors_file)
 
-    if author:
-        quote = Quote(
-            tags=obj['tags'],
-            author=author,
-            quote=obj['quote']
-        )
-        quote.save()
-    else:
-        print(f"Author '{obj['author']}' not found, skipping quote.")
+    for author_info in authors_data:
+        author = Author(**author_info)
+        author.save()
+
+
+    # Завантаження даних цитат
+
+    quote_info_path = Path('part_uno/json/quotes.json')
+
+    with open(quote_info_path, 'r') as quotes_file:
+        quotes_data = json.load(quotes_file)
+
+    for quote_info in quotes_data:
+        author_name = quote_info["author"]
+        author = Author.objects(fullname=author_name).first()
+        if author:
+            quote_info["author"] = author
+            quote = Quote(**quote_info)
+            quote.save()
+
+
+if __name__ == '__main__':
+    load_data()

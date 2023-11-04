@@ -1,23 +1,43 @@
-while True:
-    user_input = input("Введіть команду (наприклад, 'name: Steve Martin', 'tag: life', 'tags: life,live', 'exit'): ").strip()
-    command, value = user_input.split(': ', 1)
+from models import Author, Quote
+import connect
 
-    if command == 'exit':
-        break
+# Функція для пошуку цитат за тегом або ім'ям автора
+def search_quotes(query):
+    if query.startswith('name:'):
+        author_name = query[len('name: '):]
+        author = Author.objects(fullname=author_name).first()
+        if author:
+            quotes = Quote.objects(author=author)
+            return [quote.quote for quote in quotes]
+        else:
+            return []
 
-    if command == 'name':
-        quotes = Quote.objects(author__name=value)
-    elif command == 'tag':
-        quotes = Quote.objects(tags=value)
-    elif command == 'tags':
-        tags = value.split(',')
+    elif query.startswith('tag:'):
+        tag = query[len('tag: '):]
+        quotes = Quote.objects(tags=tag)
+        return [quote.quote for quote in quotes]
+
+    elif query.startswith('tags:'):
+        tags = query[len('tags: '):].split(',')
         quotes = Quote.objects(tags__in=tags)
-    else:
-        print("Невідома команда.")
-        continue
+        return [quote.quote for quote in quotes]
 
-    if quotes:
-        for quote in quotes:
-            print(f"{quote.author.name}: {quote.text}, Tags: {', '.join(quote.tags)}")
+    elif query == 'exit':
+        return "Дякую, що використовували наш скрипт. До побачення!"
+
     else:
-        print("Цитати не знайдено.")
+        return "Невідома команда. Будь ласка, введіть правильну команду."
+
+if __name__ == "__main__":
+
+    while True:
+        user_input = input("Введіть команду (наприклад, 'name: Steve Martin'): ")
+        if user_input == 'exit':
+            break
+        
+        result = search_quotes(user_input)
+        if isinstance(result, list):
+            for quote in result:
+                print(quote)
+        else:
+            print(result)
